@@ -1,0 +1,11 @@
+---
+ecg_version: 1.2.0
+
+ecg_metrics:
+  # process:
+  # cpu:
+  # memory:
+
+harness_url: app.harness.io
+harness_account_id:
+harness_platform_api_key:
