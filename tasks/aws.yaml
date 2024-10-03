@@ -1,0 +1,19 @@
+---
+- name: Get aws instance id
+  uri:
+    url: http://169.254.169.254/latest/meta-data/instance-id
+    method: GET
+    return_content: yes
+  register: instance_id_metadata
+
+- name: Get aws instance region
+  uri:
+    url: http://169.254.169.254/latest/meta-data/placement/region
+    method: GET
+    return_content: yes
+  register: instance_region_metadata
+
+- set_fact:
+    rule_name: "{{ instance_id_metadata.content }}"
+    instance_id: "{{ instance_id_metadata.content }}"
+    instance_region: "{{ instance_region_metadata.content }}"
