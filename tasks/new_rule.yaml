@@ -8,3 +8,10 @@
     body_format: json
     body: "{{ lookup('template','autostoppingRule.json.j2') }}"
   register: new_rule
+
+- name: Simulate activity
+  uri:
+    url: https://{{ harness_url }}/gateway/lw/api/internal/services/{{ new_rule.json.response.id }}/usage
+    method: POST
+    headers:
+      x-api-key: "{{ harness_platform_api_key }}"

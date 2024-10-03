@@ -8,8 +8,6 @@ Will also create an autostopping rule for the instance if one dosn't exist alrea
 
 You will need an active Harness CCM license, and an API key with `autostopping:read`. If you want to create autostopping rules when they dont exist, you will also need `autostopping:create`.
 
-Right now this role only works for EC2 based VMs.
-
 ## role variables
 
 ```
@@ -46,7 +44,11 @@ If both cpu and memory are specified, bother conditions must be met to be consid
 
 None
 
+# example usage
+
 ## example inventory
+
+the below defines a multi-cloud inventory
 
 ```yaml
 all:

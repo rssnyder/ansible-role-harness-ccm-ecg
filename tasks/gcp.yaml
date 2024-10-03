@@ -1,5 +1,32 @@
 ---
-- debug:
-    msg: "gcp unsupported"
+- name: Get gcp instance id metadata
+  uri:
+    url: http://metadata.google.internal/computeMetadata/v1/instance/id
+    method: GET
+    headers:
+      Metadata-Flavor: Google
+    return_content: yes
+  register: instance_id_metadata
 
-- command: /bin/failme
+- name: Get gcp instance region metadata
+  uri:
+    url: http://metadata.google.internal/computeMetadata/v1/instance/zone
+    method: GET
+    headers:
+      Metadata-Flavor: Google
+    return_content: yes
+  register: instance_region_metadata
+
+- name: Get gcp instance name metadata
+  uri:
+    url: http://metadata.google.internal/computeMetadata/v1/instance/name
+    method: GET
+    headers:
+      Metadata-Flavor: Google
+    return_content: yes
+  register: instance_name_metadata
+
+- set_fact:
+    rule_name: "{{ instance_name_metadata.content }}"
+    instance_id: "{{ instance_id_metadata.content }}"
+    instance_region: "{{ instance_region_metadata.content | split('/') | last}}"
