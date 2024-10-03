@@ -11,18 +11,22 @@
   include_tasks: gcp.yaml
   when: cloud == "gcp"
 
-- name: Get metadata for aws, otherwise azure
+- name: Get metadata for aws, otherwise azure or gcp
   block:
   - name: Get aws metadata
     include_tasks: aws.yaml
   rescue:
-  - name: Get azure metadata
-    include_tasks: azure.yaml
+    - block:
+      - name: Get azure metadata
+        include_tasks: azure.yaml
+      rescue:
+        - name: Get gcp metadata
+          include_tasks: gcp.yaml
   when: not cloud
 
 - name: Show instance metadata
   debug:
-    msg: "{{ instance_id }} in {{ instance_region }}"
+    msg: "{{ rule_name }}: {{ instance_id }} in {{ instance_region }}"
     verbosity: 1
 
 - name: Check for existing rule
@@ -104,5 +108,5 @@
   systemd:
     daemon_reload: true
     enabled: yes
-    state: restarted
+    state: reloaded
     name: ecg
