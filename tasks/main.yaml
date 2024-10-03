@@ -1,23 +1,29 @@
 ---
-- name: Get instance id
-  uri:
-    url: http://169.254.169.254/latest/meta-data/instance-id
-    method: GET
-    return_content: yes
-  register: instance_id_metadata
+- name: Get aws metadata
+  include_tasks: aws.yaml
+  when: cloud == "aws"
 
-- set_fact:
-    instance_id: "{{ instance_id_metadata.content }}"
+- name: Get azure metadata
+  include_tasks: azure.yaml
+  when: cloud == "azure"
 
-- name: Get instance region
-  uri:
-    url: http://169.254.169.254/latest/meta-data/placement/region
-    method: GET
-    return_content: yes
-  register: instance_region_metadata
+- name: Get gcp metadata
+  include_tasks: gcp.yaml
+  when: cloud == "gcp"
 
-- set_fact:
-    instance_region: "{{ instance_region_metadata.content }}"
+- name: Get metadata for aws, otherwise azure
+  block:
+  - name: Get aws metadata
+    include_tasks: aws.yaml
+  rescue:
+  - name: Get azure metadata
+    include_tasks: azure.yaml
+  when: not cloud
+
+- name: Show instance metadata
+  debug:
+    msg: "{{ instance_id }} in {{ instance_region }}"
+    verbosity: 1
 
 - name: Check for existing rule
   uri:
@@ -31,16 +37,24 @@
       limit: 1
   register: existing_rule
 
-- name: Create an autostopping rule
-  include_tasks: new_rule.yaml
-  when: existing_rule.json.response.total == 0
-
-- set_fact:
-    host_name: "{{ existing_rule.json.response.records[0].host_name }}"
+- name: Found existing rule
+  block:
+  - set_fact:
+      host_name: "{{ existing_rule.json.response.records[0].host_name }}"
+  - name: Show existing rule
+    debug:
+      msg: "https://{{ harness_url }}/ng/account/{{ harness_account_id }}/module/ce/autostopping-rules/rule/{{ existing_rule.json.response.records[0].id }}"
   when: existing_rule.json.response.total != 0
 
-- set_fact:
-    host_name: "{{ new_rule.json.response.host_name }}"
+- name: Creating new rule
+  block:
+  - name: Create an autostopping rule
+    include_tasks: new_rule.yaml
+  - set_fact:
+      host_name: "{{ new_rule.json.response.host_name }}"
+  - name: Show new rule
+    debug:
+      msg: "https://{{ harness_url }}/ng/account/{{ harness_account_id }}/module/ce/autostopping-rules/rule/{{ new_rule.json.response.id }}"
   when: existing_rule.json.response.total == 0
 
 - name: Create lightwing directory
@@ -61,6 +75,11 @@
     url: https://lightwing-downloads-temp.s3.ap-south-1.amazonaws.com/ecg/ecg_{{ ecg_version }}_{{ ecg_platform }}.zip
     dest: /etc/lightwing/ecg_{{ ecg_version }}_{{ ecg_platform }}.zip
     mode: '0400'
+
+- name: Install unzip
+  package:
+    name: zip
+    state: present
 
 - name: Extract ecg
   unarchive:
@@ -87,4 +106,3 @@
     enabled: yes
     state: restarted
     name: ecg
-

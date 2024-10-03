@@ -6,10 +6,15 @@ ecg_metrics:
   # cpu:
   # memory:
 
+# settings for your harness account
 harness_url: app.harness.io
 harness_account_id:
 harness_platform_api_key:
 
+# settings for new autostopping rules
 autostopping_rule_idle_time_mins: 5
 autostopping_rule_cloud_connector:
 autostopping_dry_run: false
+
+# specify aws, azure or gcp, otherwise we will check in that order
+cloud:

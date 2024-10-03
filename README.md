@@ -30,6 +30,14 @@ ecg_metrics:
 harness_url: app.harness.io
 harness_account_id:
 harness_platform_api_key:
+
+# settings for new autostopping rules
+autostopping_rule_idle_time_mins: 5
+autostopping_rule_cloud_connector:
+autostopping_dry_run: false
+
+# specify aws, azure or gcp, otherwise we will check in that order
+cloud:
 ```
 
 If both cpu and memory are specified, bother conditions must be met to be considered active.
@@ -38,7 +46,41 @@ If both cpu and memory are specified, bother conditions must be met to be consid
 
 None
 
-## example Playbook
+## example inventory
+
+```yaml
+all:
+  children:
+    aws:
+      vars:
+        autostopping_rule_cloud_connector: awsconnectorid
+        cloud: aws
+      hosts:
+        one:
+          ecg_metrics:
+            process: python*
+    azure:
+      vars:
+        autostopping_rule_cloud_connector: azureconnectorid
+        cloud: azure
+      hosts: 
+        three:
+          ecg_metrics:
+            cpu: 50
+            memory: 1Mi
+    gcp:
+      vars:
+        autostopping_rule_cloud_connector: gcpconnectorid
+        cloud: gcp
+      hosts: 
+        three:
+          ecg_metrics:
+            process: python*
+            cpu: 50
+            memory: 1Mi
+```
+
+## example playbook
 
 ```
 - name: Servers
@@ -49,13 +91,6 @@ None
         harness
           account_id: "wlgELJ0TTre5aZhzpt8gVA"
           platform_api_key: "sat.wlgELJ0TTre5aZhzpt8gVA.XXX"
-        ecg_metrics:
-          # watch for any processes that start with `python`
-          process: python*
-          # active is 50% cpu
-          cpu: 50
-          # and 1G of memory
-          memory: 1G
 ```
 
 # license

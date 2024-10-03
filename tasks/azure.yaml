@@ -1,0 +1,13 @@
+---
+- name: Get azure instance metadata
+  uri:
+    url: http://169.254.169.254/metadata/instance?api-version=2021-02-01
+    method: GET
+    headers:
+      Metadata: true
+  register: instance_metadata
+
+- set_fact:
+    rule_name: "{{ instance_metadata.json.compute.resourceId | split('/') | last}}"
+    instance_id: "{{ instance_metadata.json.compute.resourceId }}"
+    instance_region: "{{ instance_metadata.json.compute.location }}"

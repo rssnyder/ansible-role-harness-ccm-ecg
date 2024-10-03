@@ -1,0 +1,5 @@
+---
+- debug:
+    msg: "gcp unsupported"
+
+- command: /bin/failme
