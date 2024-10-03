@@ -2,17 +2,17 @@
 
 Install and configure the ECG on a VM for Harness CCM Auto Stopping.
 
-Will also create an autostopping rule for the instance if one dosn't exist already.
+This role will also create an autostopping rule for the instance if one doesn't exist already.
 
 ## requirements
 
-You will need an active Harness CCM license, and an API key with `autostopping:read`. If you want to create autostopping rules when they dont exist, you will also need `autostopping:create`.
+You will need an active Harness CCM license, and an API key with `autostopping:read`. If you want to create autostopping rules when they don't exist, you will also need `autostopping:create`.
 
 Right now this role only works for EC2 based VMs.
 
 ## role variables
 
-```
+```yaml
 ecg_version: 1.2.0
 # right now only linux x86 is supported
 ecg_platform: linux_amd64
@@ -30,9 +30,14 @@ ecg_metrics:
 harness_url: app.harness.io
 harness_account_id:
 harness_platform_api_key:
+
+# settings to be used when creating new rules
+autostopping_rule_idle_time_mins: 5
+autostopping_rule_cloud_connector:
+autostopping_dry_run: false
 ```
 
-If both cpu and memory are specified, bother conditions must be met to be considered active.
+If both cpu and memory are specified, both conditions must be met to be considered active.
 
 ## dependencies
 
@@ -40,13 +45,15 @@ None
 
 ## example Playbook
 
-```
+```yaml
+---
 - name: Servers
   hosts: all
   roles:
     - role: rssnyder.harness-ccm-ecg
       vars:
-        harness
+        autostopping_rule_cloud_connector: awsaccountXYZ
+        harness:
           account_id: "wlgELJ0TTre5aZhzpt8gVA"
           platform_api_key: "sat.wlgELJ0TTre5aZhzpt8gVA.XXX"
         ecg_metrics:
