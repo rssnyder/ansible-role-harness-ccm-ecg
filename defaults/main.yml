@@ -9,3 +9,7 @@ ecg_metrics:
 harness_url: app.harness.io
 harness_account_id:
 harness_platform_api_key:
+
+autostopping_rule_idle_time_mins: 5
+autostopping_rule_cloud_connector:
+autostopping_dry_run: false

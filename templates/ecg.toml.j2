@@ -2,18 +2,16 @@ accountID = "{{ harness_account_id }}"
 apiURL = "https://{{ harness_url }}/gateway/lw/api"
 ruleHostName = "{{ host_name }}"
 
-{% if 'process' in ecg_metrics %}
 [process]
+{% if 'process' in ecg_metrics %}
 condition = "{{ ecg_metrics.process }}"  
 {% endif %}
 
-{% if ecg_metrics %}
 [metrics]
 {% if 'cpu' in ecg_metrics %}
 cpu = "{{ ecg_metrics.cpu }}"  
 {% endif %}
 {% if 'memory' in ecg_metrics %}
 memory = "{{ ecg_metrics.memory }}"
-{% endif %}
 
 {% endif %}

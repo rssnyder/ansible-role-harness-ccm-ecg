@@ -9,6 +9,16 @@
 - set_fact:
     instance_id: "{{ instance_id_metadata.content }}"
 
+- name: Get instance region
+  uri:
+    url: http://169.254.169.254/latest/meta-data/placement/region
+    method: GET
+    return_content: yes
+  register: instance_region_metadata
+
+- set_fact:
+    instance_region: "{{ instance_region_metadata.content }}"
+
 - name: Check for existing rule
   uri:
     url: https://{{ harness_url }}/gateway/lw/api/accounts/{{ harness_account_id }}/autostopping/rules/list?routingId={{ harness_account_id }}&accountIdentifier={{ harness_account_id }}
@@ -21,8 +31,17 @@
       limit: 1
   register: existing_rule
 
+- name: Create an autostopping rule
+  include_tasks: new_rule.yaml
+  when: existing_rule.json.response.total == 0
+
 - set_fact:
     host_name: "{{ existing_rule.json.response.records[0].host_name }}"
+  when: existing_rule.json.response.total != 0
+
+- set_fact:
+    host_name: "{{ new_rule.json.response.host_name }}"
+  when: existing_rule.json.response.total == 0
 
 - name: Create lightwing directory
   file: 

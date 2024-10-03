@@ -1,0 +1,10 @@
+- name: Create autostopping rule
+  uri:
+    url: https://{{ harness_url }}/gateway/lw/api/accounts/{{ harness_account_id }}/autostopping/v2/rules?routingId={{ harness_account_id }}&accountIdentifier={{ harness_account_id }}
+    method: POST
+    headers:
+      x-api-key: "{{ harness_platform_api_key }}"
+    status_code: 201
+    body_format: json
+    body: "{{ lookup('template','autostoppingRule.json.j2') }}"
+  register: new_rule

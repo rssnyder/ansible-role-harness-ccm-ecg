@@ -2,11 +2,11 @@
 
 Install and configure the ECG on a VM for Harness CCM Auto Stopping.
 
+Will also create an autostopping rule for the instance if one dosn't exist already.
+
 ## requirements
 
-You will need an active Harness CCM license, and an API key with `autostopping:read`.
-
-The EC2 instance you are targeting must have an existing autostopping rule.
+You will need an active Harness CCM license, and an API key with `autostopping:read`. If you want to create autostopping rules when they dont exist, you will also need `autostopping:create`.
 
 Right now this role only works for EC2 based VMs.
 
