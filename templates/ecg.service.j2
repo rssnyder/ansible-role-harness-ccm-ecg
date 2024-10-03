@@ -1,0 +1,14 @@
+[Unit]
+Description=Lightwing ECG
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ecg --config /etc/lightwing/ecg.toml start
+ExecStop=/bin/kill -s TERM $MAINPID
+TimeoutStopSec=0
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=ecg.service

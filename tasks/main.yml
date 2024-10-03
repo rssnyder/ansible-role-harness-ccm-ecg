@@ -1,0 +1,90 @@
+---
+- name: Get instance id
+  uri:
+    url: http://169.254.169.254/latest/meta-data/instance-id
+    method: GET
+    return_content: yes
+  register: instance_id_metadata
+
+- set_fact:
+    instance_id: "{{ instance_id_metadata.content }}"
+
+- name: Get instance region
+  uri:
+    url: http://169.254.169.254/latest/meta-data/placement/region
+    method: GET
+    return_content: yes
+  register: instance_region_metadata
+
+- set_fact:
+    instance_region: "{{ instance_region_metadata.content }}"
+
+- name: Check for existing rule
+  uri:
+    url: https://{{ harness_url }}/gateway/lw/api/accounts/{{ harness_account_id }}/autostopping/rules/list?routingId={{ harness_account_id }}&accountIdentifier={{ harness_account_id }}
+    method: POST
+    headers:
+      x-api-key: "{{ harness_platform_api_key }}"
+    body_format: json
+    body:
+      query: "{{ instance_id }}"
+      limit: 1
+  register: existing_rule
+
+- name: Create an autostopping rule
+  include_tasks: new_rule.yaml
+  when: existing_rule.json.response.total == 0
+
+- set_fact:
+    host_name: "{{ existing_rule.json.response.records[0].host_name }}"
+  when: existing_rule.json.response.total != 0
+
+- set_fact:
+    host_name: "{{ new_rule.json.response.host_name }}"
+  when: existing_rule.json.response.total == 0
+
+- name: Create lightwing directory
+  file: 
+    state: directory
+    path: /etc/lightwing
+    owner: root
+    group: root
+
+- name: Copy ecg config file
+  template: 
+    src: ecg.toml.j2
+    dest: /etc/lightwing/ecg.toml
+    owner: root
+
+- name: Download ecg
+  get_url:
+    url: https://lightwing-downloads-temp.s3.ap-south-1.amazonaws.com/ecg/ecg_{{ ecg_version }}_{{ ecg_platform }}.zip
+    dest: /etc/lightwing/ecg_{{ ecg_version }}_{{ ecg_platform }}.zip
+    mode: '0400'
+
+- name: Extract ecg
+  unarchive:
+    remote_src: yes
+    src: /etc/lightwing/ecg_{{ ecg_version }}_{{ ecg_platform }}.zip
+    dest: /etc/lightwing
+
+- name: Copy ecg
+  copy:
+    remote_src: yes
+    src: /etc/lightwing/ecg_{{ ecg_version }}_{{ ecg_platform }}/ecg
+    dest: /usr/local/bin/
+    mode: '0700'
+
+- name: Copy ecg service file
+  template: 
+    src: ecg.service.j2
+    dest: /etc/systemd/system/ecg.service
+    owner: root
+
+- name: Enable ecg
+  systemd:
+    daemon_reload: true
+    enabled: yes
+    state: restarted
+    name: ecg
+

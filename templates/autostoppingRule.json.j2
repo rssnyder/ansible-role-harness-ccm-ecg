@@ -1,0 +1,51 @@
+{
+    "service": {
+        "name": "{{ instance_id }}",
+        "account_identifier": "{{ harness_account_id }}",
+        "fulfilment": "ondemand",
+        "kind": "instance",
+        "cloud_account_id": "{{ autostopping_rule_cloud_connector }}",
+        "idle_time_mins": {{ autostopping_rule_idle_time_mins }},
+        "custom_domains": [],
+        "health_check": {
+            "protocol": "http",
+            "path": "/",
+            "port": 80,
+            "timeout": 30,
+            "status_code_from": 200,
+            "status_code_to": 299,
+        },
+        "routing": {
+            "ports": [],
+            "instance": {
+                "filter": {
+                    "ids": [
+                        "{{ instance_id }}"
+                    ],
+                    "regions": [
+                        "{{ instance_region }}"
+                    ]
+                }
+            },
+        },
+        "opts": {
+            "dry_run": {{ autostopping_dry_run }},
+            "preservePrivateIP": False,
+            "deleteCloudResources": False,
+            "alwaysUsePrivateIP": False,
+            "hide_progress_page": False,
+            "preserve_private_ip": False,
+            "always_use_private_ip": False,
+        },
+        "metadata": {
+            "cloud_provider_details": {
+                "name": "{{ autostopping_rule_cloud_connector }}"
+            }
+        },
+        "disabled": False,
+        "match_all_subdomains": False,
+        "access_point_id": "",
+    },
+    "deps": [],
+    "apply_now": True,
+}
